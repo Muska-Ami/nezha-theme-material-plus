@@ -44,7 +44,7 @@
   }
   @media screen and(max-width: 650px) {
     .sv-card {
-      width: max-content;
+      width: 90%;
     }
     .netspeed {
       width: 100%;
@@ -87,7 +87,7 @@
     </mdui-dropdown>
   </mdui-top-app-bar>
   <div class="app">
-    <mdui-tabs value="{{tr "Default"}}" style="margin: 1rem;">
+    <mdui-tabs :value="def_val" style="margin: 1rem;">
        <mdui-tab v-for="group in groups" :value="group.Tag!==''?group.Tag:'{{tr "Default"}}'">@#(group.Tag!==''?group.Tag:'{{tr "Default"}}')#@</mdui-tab>
   
         <mdui-tab-panel slot="panel" v-for="group in groups" :value="group.Tag!==''?group.Tag:'{{tr "Default"}}'">
@@ -132,7 +132,7 @@
                 </mdui-list>
                 <!-- 网络 -->
                 <mdui-list slot="custom" class="netspeed">
-                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "MemUsed"}}</mdui-list-subheader>
+                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "NetSpeed"}}</mdui-list-subheader>
                   <mdui-list-item>
                     <mdui-chip class="sub-v" elevated>
                       <ion-icon class="ioic" name="arrow-up-circle-outline"></ion-icon>
@@ -270,6 +270,8 @@
       },
       group() {
         this.groups = groupingData(this.data, "Tag")
+        this.def_val = "{{tr "Default"}}";
+        if (this.groups[0].Tag != '') this.def_val = this.groups[0]?.Tag;
       },
       formatPercent(live, used, total) {
         const percent = live ? (parseInt(used / total * 100) || 0) : -1
@@ -342,7 +344,6 @@
     })
     return dest;
   }
-
 </script>
 <script>
   const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
