@@ -1,3 +1,5 @@
+![Screenshot](screenshot.png)
+
 # 哪吒监控主题 Material+
 
 基于新的 MDUI2 制作，使用Material Design 3设计，更美观。
