@@ -9,3 +9,11 @@
 1. 克隆当前仓库到本地
 2. 将 `theme-custom`(前台主题)、`static-custom`(前台主题静态文件) 和 `dashboard-custom`(后台主题) 放置到服务器上的 `/opt/nezha/dashboard/` 中
 3. 将设置中 `前台主题` 设置为 `Custom(Local)` (目前只做了前台)
+
+## For developers
+
+Docker Compose 一键启动测试环境
+
+```sh
+docker-compose up
+```
