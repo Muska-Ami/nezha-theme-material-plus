@@ -7,7 +7,7 @@
 </script>
 
 <!-- Vue3 -->
-<script src="https://fnj.1l1.icu/unpkg/vue@3/dist/vue.global.js"></script>
+<!-- <script src="https://fnj.1l1.icu/unpkg/vue@3/dist/vue.global.js"></script> -->
 <!-- MDUI2 -->
 <link rel="stylesheet" href="https://fnj.1l1.icu/unpkg/mdui@2.0.3/mdui.css">
 <script src="https://fnj.1l1.icu/unpkg/mdui@2.0.3/mdui.global.js"></script>
@@ -15,6 +15,9 @@
 <script type="module" src="https://fnj.1l1.icu/unpkg/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://fnj.1l1.icu/unpkg/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 <style>
+  * {
+    transition: 0.7s;
+  }
   body {
     background: none;
   }
@@ -29,6 +32,9 @@
     margin-top: 0.3rem;
     margin-right: 1rem;
   }
+  .noe-dialog .noe-btn {
+    width: 100%;
+  }
   .country {
     margin: 5px;
     height: 2.5rem;
@@ -39,12 +45,12 @@
     margin: 1.5rem;
   }
   .sv-card {
-    width: 400px;
-    margin: 1rem;
+    width: 360px;
+    margin-inline: 0.3rem;
   }
   @media screen and(max-width: 650px) {
     .sv-card {
-      width: 90%;
+      width: 80%;
     }
     .netspeed {
       width: 100%;
@@ -65,8 +71,10 @@
 <div class="mdui-prose">
   <mdui-top-app-bar>
     <mdui-dialog class="noe-dialog">
-      喜报，这里还没有功能喵~<br>
-      <mdui-button class="noe-close-button">关闭</mdui-button>
+      <a href="/"><mdui-button class="noe-btn dia-home" variant="text">首页</mdui-button></a><br>
+      <a href="/service"><mdui-button class="noe-btn dia-service" variant="text">服务</mdui-button></a><br>
+      <a href="/network"><mdui-button class="noe-btn dia-network" variant="text">网络</mdui-button></a><br>
+      <mdui-button class="noe-close-button" style="float: right;">关闭</mdui-button>
     </mdui-dialog>
     <mdui-button-icon class="noe-open-button"><ion-icon name="apps-outline"></ion-icon></mdui-button-icon>
     <mdui-top-app-bar-title>{{.Title}}</mdui-top-app-bar-title>
@@ -91,99 +99,110 @@
        <mdui-tab v-for="group in groups" :value="group.Tag!==''?group.Tag:'{{tr "Default"}}'">@#(group.Tag!==''?group.Tag:'{{tr "Default"}}')#@</mdui-tab>
   
         <mdui-tab-panel slot="panel" v-for="group in groups" :value="group.Tag!==''?group.Tag:'{{tr "Default"}}'">
+          <div style="height: 1rem;width: 100%;"></div>
           <mdui-card class="sv-card" v-for="server in group.data" :id="server.ID">
-            <div v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
-              <div class="sv-hd">
-                <mdui-avatar class="country" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"></mdui-avatar>
-                <mdui-tooltip :content="(server.Name + (server.live?'':'[{{tr "Offline"}}]'))">
-                  <small style="width: 100%;font-size: 1.5rem;background-color: white;text-overflow:ellipsis;border-radius: 50px;padding-block: 2px;padding-inline: 10px;">@#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@</small>
-                </mdui-tooltip>
-                <mdui-chip class="uptime">
-                  <ion-icon class="ioic" name="time-outline"></ion-icon>
-                  {{tr "Uptime"}}&nbsp;
-                  @#secondToDate(server.State.Uptime)#@
-                </mdui-chip>
+              <div v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
+                <div class="sv-hd">
+                  <mdui-avatar class="country" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"></mdui-avatar>
+                  <mdui-tooltip :content="(server.Name + (server.live?'':'[{{tr "Offline"}}]'))">
+                    <small style="width: 100%;font-size: 1.5rem;background-color: white;text-overflow:ellipsis;border-radius: 50px;padding-block: 2px;padding-inline: 10px;">@#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@</small>
+                  </mdui-tooltip>
+                  <mdui-chip class="uptime">
+                    <ion-icon class="ioic" name="time-outline"></ion-icon>
+                    {{tr "Uptime"}}&nbsp;
+                    @#secondToDate(server.State.Uptime)#@
+                  </mdui-chip>
+                </div>
+                <mdui-divider></mdui-divider>
+                <div class="sv-desc">
+                  <!-- CPU -->
+                  <mdui-list slot="custom" class="cpu">
+                    <mdui-list-subheader style="height: 2rem;line-height:2rem;">CPU</mdui-list-subheader>
+                    <mdui-list-item>
+                      <mdui-linear-progress :value="(formatPercent(server.live,server.State.CPU,100).percent)" max="100"></mdui-linear-progress>
+                      <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
+                    </mdui-list-item>
+                  </mdui-list>
+                  <!-- 运存 -->
+                  <mdui-list slot="custom" class="memory">
+                    <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "MemUsed"}}</mdui-list-subheader>
+                    <mdui-list-item>
+                      <mdui-linear-progress :value="(formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).percent)" max="100"></mdui-linear-progress>
+                      <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
+                    </mdui-list-item>
+                  </mdui-list>
+                  <!-- SWAP -->
+                  <mdui-list slot="custom" class="swap">
+                    <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "SwapUsed"}}</mdui-list-subheader>
+                    <mdui-list-item>
+                      <mdui-linear-progress :value="(formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).percent)" max="100"></mdui-linear-progress>
+                      <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
+                    </mdui-list-item>
+                  </mdui-list>
+                  <!-- 网络 -->
+                  <mdui-list slot="custom" class="netspeed">
+                    <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "NetSpeed"}}</mdui-list-subheader>
+                    <mdui-list-item>
+                      <mdui-chip class="sub-v" elevated>
+                        <ion-icon class="ioic" name="arrow-up-circle-outline"></ion-icon>
+                        @#formatByteSize(server.State.NetInSpeed)#@/s
+                      </mdui-chip>
+                      <mdui-chip class="sub-v" elevated>
+                        <ion-icon class="ioic" name="arrow-down-circle-outline"></ion-icon>
+                        @#formatByteSize(server.State.NetOutSpeed)#@/s
+                      </mdui-chip>
+                    </mdui-list-item>
+                  </mdui-list>
+                </div>
               </div>
               <mdui-divider></mdui-divider>
-              <div class="sv-desc">
-                <!-- CPU -->
-                <mdui-list slot="custom" class="cpu">
-                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">CPU</mdui-list-subheader>
-                  <mdui-list-item>
-                    <mdui-linear-progress :value="(formatPercent(server.live,server.State.CPU,100).percent)" max="100"></mdui-linear-progress>
-                    <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
-                  </mdui-list-item>
-                </mdui-list>
-                <!-- 运存 -->
-                <mdui-list slot="custom" class="memory">
-                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "MemUsed"}}</mdui-list-subheader>
-                  <mdui-list-item>
-                    <mdui-linear-progress :value="(formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).percent)" max="100"></mdui-linear-progress>
-                    <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
-                  </mdui-list-item>
-                </mdui-list>
-                <!-- SWAP -->
-                <mdui-list slot="custom" class="swap">
-                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "SwapUsed"}}</mdui-list-subheader>
-                  <mdui-list-item>
-                    <mdui-linear-progress :value="(formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).percent)" max="100"></mdui-linear-progress>
-                    <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
-                  </mdui-list-item>
-                </mdui-list>
-                <!-- 网络 -->
-                <mdui-list slot="custom" class="netspeed">
-                  <mdui-list-subheader style="height: 2rem;line-height:2rem;">{{tr "NetSpeed"}}</mdui-list-subheader>
-                  <mdui-list-item>
-                    <mdui-chip class="sub-v" elevated>
-                      <ion-icon class="ioic" name="arrow-up-circle-outline"></ion-icon>
-                      @#formatByteSize(server.State.NetInSpeed)#@/s
-                    </mdui-chip>
-                    <mdui-chip class="sub-v" elevated>
-                      <ion-icon class="ioic" name="arrow-down-circle-outline"></ion-icon>
-                      @#formatByteSize(server.State.NetOutSpeed)#@/s
-                    </mdui-chip>
-                  </mdui-list-item>
+              <div class="sv-info">
+                <mdui-list>
+                  <mdui-collapse accordion>
+                    <mdui-collapse-item>
+                      <mdui-list-item slot="header">
+                        <ion-icon class="ioic" name="information-circle-outline"></ion-icon>
+                        详细信息
+                      </mdui-list-item>
+                      <mdui-list-item>
+                        {{tr "Platform"}}: @#server.Host.Platform#@-@#server.Host.PlatformVersion#@
+                        [<small
+                          v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</small>@#server.Host.Arch#@]<br />
+                        CPU: @#server.Host.CPU#@<br />
+                        {{tr "DiskUsed"}}:
+                        @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
+                        {{tr "MemUsed"}}:
+                        @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
+                        {{tr "SwapUsed"}}:
+                        @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
+                        {{tr "NetTransfer"}}: <i
+                          class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
+                          class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
+                        {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
+                        toFixed2(server.State.Load15) #@<br />
+                        {{tr "ProcessCount"}}: @# server.State.ProcessCount #@<br />
+                        {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
+                        {{tr "BootTime"}}: @# formatTimestamp(server.Host.BootTime) #@<br />
+                        {{tr "LastActive"}}: @# new Date(server.LastActive).toLocaleString() #@<br />
+                        {{tr "Version"}}: @#server.Host.Version#@<br />
+                      </mdui-list-item>
+                    </mdui-collapse-item>
+                  </mdui-collapse>
                 </mdui-list>
               </div>
-            </div>
-            <mdui-divider></mdui-divider>
-            <div class="sv-info">
-              <mdui-list>
-                <mdui-collapse accordion>
-                  <mdui-collapse-item>
-                    <mdui-list-item slot="header">
-                      <ion-icon class="ioic" name="information-circle-outline"></ion-icon>
-                      详细信息
-                    </mdui-list-item>
-                    <mdui-list-item>
-                      {{tr "Platform"}}: @#server.Host.Platform#@-@#server.Host.PlatformVersion#@
-                      [<small
-                        v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</small>@#server.Host.Arch#@]<br />
-                      CPU: @#server.Host.CPU#@<br />
-                      {{tr "DiskUsed"}}:
-                      @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
-                      {{tr "MemUsed"}}:
-                      @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
-                      {{tr "SwapUsed"}}:
-                      @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
-                      {{tr "NetTransfer"}}: <i
-                        class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
-                        class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
-                      {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
-                      toFixed2(server.State.Load15) #@<br />
-                      {{tr "ProcessCount"}}: @# server.State.ProcessCount #@<br />
-                      {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
-                      {{tr "BootTime"}}: @# formatTimestamp(server.Host.BootTime) #@<br />
-                      {{tr "LastActive"}}: @# new Date(server.LastActive).toLocaleString() #@<br />
-                      {{tr "Version"}}: @#server.Host.Version#@<br />
-                    </mdui-list-item>
-                  </mdui-collapse-item>
-                </mdui-collapse>
-              </mdui-list>
-            </div>
-          </mdui-card>
+            </mdui-card>
         </mdui-tab-panel>
     </mdui-tabs>
+    <div style="height: 4.5rem;width: 100%;"></div>
+    <mdui-bottom-app-bar>
+      <p class="mdui-prose" style="margin-top: 1rem;color: rgb(213, 46, 144);">
+        <!-- 建议保留该信息，这是对开发者的尊重 -->
+        Powered by <a href="https://github.com/naiba/nezha">哪吒监控</a>.<br>
+        Theme <a href="https://github.com/Muska-Ami/nezha-theme-material-plus">Material+</a> created by <a href="https://1l1.icu">夏沫花火zzz🌙</a>.
+      </p>
+      <div style="flex-grow: 1"></div>
+      <!-- <mdui-fab icon="add"></mdui-fab> -->
+    </mdui-bottom-app-bar>
   </div>
   <mdui-snackbar class="connect-snackbar">WS连接建立</mdui-snackbar>
   <mdui-snackbar class="disconnect-snackbar">WS连接断开</mdui-snackbar>
