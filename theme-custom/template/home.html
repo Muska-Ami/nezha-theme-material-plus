@@ -48,6 +48,27 @@
     width: 360px;
     margin-inline: 0.3rem;
   }
+  .text-with-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+  }
+  /* 暗色模式优化，由于哪吒默认引入UI库导致暗色模式字体不正常 */
+  @media (prefers-color-scheme: dark) {
+    span,p,h1,h2,h3,h4,h5,h6,strong {
+      color: white;
+    }
+    .text-with-ellipsis::after {
+      content: '...';
+      position: absolute;
+      right: 14px;
+      top: 0;
+      color: white;
+      padding: 0 5px;
+    }
+  }
+  /* 移动端优化 */
   @media screen and(max-width: 650px) {
     .sv-card {
       width: 80%;
@@ -103,16 +124,18 @@
           <mdui-card class="sv-card" v-for="server in group.data" :id="server.ID">
               <div v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="sv-hd">
-                  <mdui-avatar class="country" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"></mdui-avatar>
-                  <mdui-tooltip :content="(server.Name + (server.live?'':'[{{tr "Offline"}}]'))">
-                    <small style="width: 100%;font-size: 1.5rem;background-color: white;text-overflow:ellipsis;border-radius: 50px;padding-block: 2px;padding-inline: 10px;">@#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@</small>
-                  </mdui-tooltip>
-                  <mdui-chip class="uptime">
-                    <ion-icon class="ioic" name="time-outline"></ion-icon>
-                    {{tr "Uptime"}}&nbsp;
-                    @#secondToDate(server.State.Uptime)#@
+                  <div style="width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      <mdui-avatar style="margin-left: 1rem; position: relative; margin-bottom: 5px; width: 26px; height: 26px;" class="country" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode ? server.Host.CountryCode : 'cn') + '.svg'"></mdui-avatar>
+                      <mdui-tooltip :content="(server.Name + (server.live ? '' : '[{{tr "Offline"}}]'))">
+                          <span class="text-with-ellipsis" style="font-size: 1.5rem; padding-block: 2px; bottom: 5px; position: relative;">@#server.Name + (server.live ? '' : '[{{tr "Offline"}}]')#@</span>
+                      </mdui-tooltip>
+                  </div>                
+                  <mdui-chip class="uptime" style="transform: translate(0, -3rem);">
+                      <ion-icon class="ioic" name="time-outline"></ion-icon>
+                      {{tr "Uptime"}}&nbsp;
+                      @#secondToDate(server.State.Uptime)#@
                   </mdui-chip>
-                </div>
+                </div>              
                 <mdui-divider></mdui-divider>
                 <div class="sv-desc">
                   <!-- CPU -->
@@ -195,7 +218,7 @@
     </mdui-tabs>
     <div style="height: 4.5rem;width: 100%;"></div>
     <mdui-bottom-app-bar>
-      <p class="mdui-prose" style="margin-top: 1rem;color: rgb(213, 46, 144);">
+      <p class="mdui-prose" style="margin-top: 1rem;">
         <!-- 建议保留该信息，这是对开发者的尊重 -->
         Powered by <a href="https://github.com/naiba/nezha">哪吒监控</a>.<br>
         Theme <a href="https://github.com/Muska-Ami/nezha-theme-material-plus">Material+</a> created by <a href="https://1l1.icu">夏沫花火zzz🌙</a>.
